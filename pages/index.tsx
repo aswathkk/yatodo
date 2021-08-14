@@ -1,5 +1,36 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
+import { Task } from '../components/Task'
+
+const tasks = [
+  {
+    name: 'Task 1',
+    completed: false,
+    subtasks: [
+      {
+        name: 'Subtask 1',
+        completed: false,
+        subtasks: [
+          {
+            name: 'Deep Task 1',
+            completed: false,
+            subtasks: [],
+          },
+        ],
+      },
+      {
+        name: 'Subtask 2',
+        completed: true,
+        subtasks: [],
+      },
+    ],
+  },
+  {
+    name: 'Task 2',
+    completed: true,
+    subtasks: [],
+  },
+]
 
 const Home: NextPage = () => {
   return (
@@ -11,6 +42,9 @@ const Home: NextPage = () => {
       </Head>
 
       <h1>Hello Next</h1>
+      {tasks.map(x => (
+        <Task {...x} />
+      ))}
     </div>
   )
 }
