@@ -21,6 +21,7 @@ const Task: FC<TaskProps> = ({
   onChange,
 }) => {
   const [checked, setChecked] = useState(completed)
+  const [childTasks, setChildTasks] = useState(subtasks)
   const didMountRef = useRef(false)
 
   useEffect(() => {
@@ -28,7 +29,12 @@ const Task: FC<TaskProps> = ({
   }, [completed])
 
   useEffect(() => {
+    setChildTasks(subtasks)
+  }, [subtasks])
+
+  useEffect(() => {
     if (didMountRef.current) {
+      setChildTasks(prev => prev?.map(x => ({ ...x, completed: checked })))
       if (onChange) onChange({ id, completed: checked })
     } else {
       didMountRef.current = true
@@ -47,9 +53,9 @@ const Task: FC<TaskProps> = ({
           {name}
         </label>
       </div>
-      {subtasks && (
+      {childTasks && (
         <div className="ml-4">
-          {subtasks.map(x => (
+          {childTasks.map(x => (
             <Task key={x.id} {...x} onChange={onChange} />
           ))}
         </div>
