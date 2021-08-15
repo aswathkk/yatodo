@@ -1,17 +1,20 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Task } from '../components/Task'
+import Task, { TaskEvent } from '../components/Task'
 
 const tasks = [
   {
+    id: 1,
     name: 'Task 1',
     completed: false,
     subtasks: [
       {
+        id: 2,
         name: 'Subtask 1',
         completed: false,
         subtasks: [
           {
+            id: 3,
             name: 'Deep Task 1',
             completed: false,
             subtasks: [],
@@ -19,6 +22,7 @@ const tasks = [
         ],
       },
       {
+        id: 4,
         name: 'Subtask 2',
         completed: true,
         subtasks: [],
@@ -26,6 +30,7 @@ const tasks = [
     ],
   },
   {
+    id: 5,
     name: 'Task 2',
     completed: true,
     subtasks: [],
@@ -33,6 +38,10 @@ const tasks = [
 ]
 
 const Home: NextPage = () => {
+  const onComplete = ({ id, completed }: TaskEvent) => {
+    console.log(id, completed)
+  }
+
   return (
     <div className="max-w-md mx-auto">
       <Head>
@@ -43,7 +52,7 @@ const Home: NextPage = () => {
 
       <h1>Hello Next</h1>
       {tasks.map(x => (
-        <Task {...x} />
+        <Task key={x.id} {...x} onChange={onComplete} />
       ))}
     </div>
   )
