@@ -26,9 +26,26 @@ const Task: FC<TaskProps> = ({
   const [childTasks, setChildTasks] = usePropAsState(subtasks)
 
   useEffectAfterMount(() => {
-    setChildTasks(prev => prev?.map(x => ({ ...x, completed: checked })))
+    if (checked)
+      setChildTasks(prev => prev?.map(x => ({ ...x, completed: checked })))
+    else if (childTasks?.every(x => x.completed))
+      setChildTasks(prev => prev?.map(x => ({ ...x, completed: checked })))
     if (onChange) onChange({ id, completed: checked })
   }, [checked])
+
+  const handleSubtaskChange = (e: TaskEvent) => {
+    setChildTasks(prev =>
+      prev?.map(x => (x.id == e.id ? { ...x, completed: e.completed } : x)),
+    )
+    if (onChange) onChange(e)
+  }
+
+  useEffectAfterMount(() => {
+    if (childTasks && childTasks?.length > 0) {
+      if (childTasks.every(x => x.completed)) setChecked(true)
+      else setChecked(false)
+    }
+  }, [childTasks])
 
   return (
     <>
@@ -45,7 +62,7 @@ const Task: FC<TaskProps> = ({
       {childTasks && (
         <div className="ml-4">
           {childTasks.map(x => (
-            <Task key={x.id} {...x} onChange={onChange} />
+            <Task key={x.id} {...x} onChange={handleSubtaskChange} />
           ))}
         </div>
       )}
