@@ -1,4 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from 'react'
+import useEffectAfterMount from '../hooks/useEffectAfterMount'
+import usePropAsState from '../hooks/usePropAsState'
 
 export interface TaskEvent {
   id: number
@@ -20,25 +22,12 @@ const Task: FC<TaskProps> = ({
   subtasks,
   onChange,
 }) => {
-  const [checked, setChecked] = useState(completed)
-  const [childTasks, setChildTasks] = useState(subtasks)
-  const didMountRef = useRef(false)
+  const [checked, setChecked] = usePropAsState(completed)
+  const [childTasks, setChildTasks] = usePropAsState(subtasks)
 
-  useEffect(() => {
-    setChecked(completed)
-  }, [completed])
-
-  useEffect(() => {
-    setChildTasks(subtasks)
-  }, [subtasks])
-
-  useEffect(() => {
-    if (didMountRef.current) {
-      setChildTasks(prev => prev?.map(x => ({ ...x, completed: checked })))
-      if (onChange) onChange({ id, completed: checked })
-    } else {
-      didMountRef.current = true
-    }
+  useEffectAfterMount(() => {
+    setChildTasks(prev => prev?.map(x => ({ ...x, completed: checked })))
+    if (onChange) onChange({ id, completed: checked })
   }, [checked])
 
   return (
