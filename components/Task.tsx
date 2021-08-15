@@ -49,18 +49,29 @@ const Task: FC<TaskProps> = ({
 
   return (
     <>
-      <div>
-        <label className={checked ? 'line-through' : ''}>
+      <div className="flex items-center p-1 group -ml-14">
+        <button className="text-lg px-2 text-gray-400 transition-all rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200">
+          +
+        </button>
+        <button className="cursor-move text-lg px-1 text-gray-400 transition-all rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 mr-2">
+          ⠿
+        </button>
+        <label className="flex items-center">
           <input
             type="checkbox"
             checked={checked}
+            className="cursor-pointer focus:ring-offset-0 focus:ring-black h-5 w-5 text-purple-600 rounded hover:bg-gray-200"
             onChange={e => setChecked(e.target.checked)}
-          />{' '}
-          {name}
+          />
+          <div
+            className={`ml-2 text-gray-700 ${checked ? 'line-through' : ''}`}
+          >
+            {name}
+          </div>
         </label>
       </div>
-      {childTasks && (
-        <div className="ml-4">
+      {childTasks && childTasks.length > 0 && (
+        <div className="ml-8">
           {childTasks.map(x => (
             <Task key={x.id} {...x} onChange={handleSubtaskChange} />
           ))}
