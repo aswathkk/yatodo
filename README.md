@@ -22,6 +22,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## TODO
 
-- [ ] Edit task (using contentEditable)
+- [x] Edit task (using contentEditable)
 - [ ] Add new task
 - [ ] Moving tasks
