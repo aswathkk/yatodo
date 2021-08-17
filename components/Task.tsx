@@ -110,6 +110,7 @@ const Task: FC<TaskProps> = ({
           html={taskName}
           onChange={e => setTaskName(e.target.value)}
           ref={inputRef}
+          placeholder="To-do"
         />
       </div>
       {childTasks && childTasks.length > 0 && (
