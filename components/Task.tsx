@@ -2,6 +2,7 @@ import React, { FC, useEffect, useMemo, useRef } from 'react'
 import ContentEditable from 'react-contenteditable'
 import useEffectAfterMount from '../hooks/useEffectAfterMount'
 import usePropAsState from '../hooks/usePropAsState'
+import useRefCallback from '../hooks/useRefCallback'
 
 export interface TaskOnChangeEvent {
   id: number
@@ -44,7 +45,6 @@ const Task: FC<TaskProps> = ({
   const [taskName, setTaskName] = usePropAsState(name)
   const [childTasks, setChildTasks] = usePropAsState(subtasks)
   const inputRef = useRef<any>(null)
-  // const inputRef = useRef<any>(null)
 
   useEffect(() => {
     if (isNew) inputRef?.current?.getEl().focus()
@@ -81,8 +81,15 @@ const Task: FC<TaskProps> = ({
       debouncedOnChange({ id, completed: checked, name: taskName })
   }, [taskName])
 
-  const handleAddClick = () => {
+  const handleAddClick = useRefCallback(() => {
     if (onAddClick) onAddClick({ id })
+  }, [onAddClick])
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddClick()
+    }
   }
 
   return (
@@ -111,6 +118,7 @@ const Task: FC<TaskProps> = ({
           onChange={e => setTaskName(e.target.value)}
           ref={inputRef}
           placeholder="To-do"
+          onKeyPress={handleKeyPress}
         />
       </div>
       {childTasks && childTasks.length > 0 && (
