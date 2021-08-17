@@ -1,12 +1,16 @@
-import React, { FC, useMemo } from 'react'
+import React, { FC, useEffect, useMemo, useRef } from 'react'
 import ContentEditable from 'react-contenteditable'
 import useEffectAfterMount from '../hooks/useEffectAfterMount'
 import usePropAsState from '../hooks/usePropAsState'
 
-export interface TaskEvent {
+export interface TaskOnChangeEvent {
   id: number
   completed: boolean
   name: string
+}
+
+export interface TaskOnAddClickEvent {
+  id: number
 }
 
 interface TaskProps {
@@ -14,7 +18,9 @@ interface TaskProps {
   name: string
   completed?: boolean
   subtasks?: TaskProps[]
-  onChange?: (event: TaskEvent) => void
+  onChange?: (event: TaskOnChangeEvent) => void
+  onAddClick?: (event: TaskOnAddClickEvent) => void
+  isNew?: boolean
 }
 
 function debounce(callback: Function, delay: number) {
@@ -31,13 +37,22 @@ const Task: FC<TaskProps> = ({
   completed = false,
   subtasks,
   onChange,
+  onAddClick,
+  isNew = false,
 }) => {
   const [checked, setChecked] = usePropAsState(completed)
   const [taskName, setTaskName] = usePropAsState(name)
   const [childTasks, setChildTasks] = usePropAsState(subtasks)
+  const inputRef = useRef<any>(null)
+  // const inputRef = useRef<any>(null)
 
-  let debouncedOnChange: Function
-  if (onChange) debouncedOnChange = useMemo(() => debounce(onChange, 500), [])
+  useEffect(() => {
+    if (isNew) inputRef?.current?.getEl().focus()
+  }, [])
+
+  const debouncedOnChange = useMemo(() => {
+    if (onChange) return debounce(onChange, 500)
+  }, [])
 
   useEffectAfterMount(() => {
     if (checked)
@@ -47,7 +62,7 @@ const Task: FC<TaskProps> = ({
     if (onChange) onChange({ id, completed: checked, name: taskName })
   }, [checked])
 
-  const handleSubtaskChange = (e: TaskEvent) => {
+  const handleSubtaskChange = (e: TaskOnChangeEvent) => {
     setChildTasks(prev =>
       prev?.map(x => (x.id == e.id ? { ...x, completed: e.completed } : x)),
     )
@@ -66,10 +81,17 @@ const Task: FC<TaskProps> = ({
       debouncedOnChange({ id, completed: checked, name: taskName })
   }, [taskName])
 
+  const handleAddClick = () => {
+    if (onAddClick) onAddClick({ id })
+  }
+
   return (
     <>
       <div className="flex p-1 group -ml-14">
-        <button className="self-start text-lg px-2 text-gray-400 transition-all rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200">
+        <button
+          onClick={handleAddClick}
+          className="self-start text-lg px-2 text-gray-400 transition-all rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200"
+        >
           +
         </button>
         <button className="self-start cursor-move text-lg px-1 text-gray-400 transition-all rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 mr-2">
@@ -87,6 +109,7 @@ const Task: FC<TaskProps> = ({
           }`}
           html={taskName}
           onChange={e => setTaskName(e.target.value)}
+          ref={inputRef}
         />
       </div>
       {childTasks && childTasks.length > 0 && (
