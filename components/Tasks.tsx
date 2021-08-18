@@ -1,12 +1,16 @@
 import { FC } from 'react'
 import usePropAsState from '../hooks/usePropAsState'
-import Task, { TaskOnAddClickEvent, TaskOnChangeEvent } from './Task'
+import Task, {
+  TaskOnAddClickEvent,
+  TaskOnChangeEvent,
+  TaskOnDeleteEvent,
+} from './Task'
 
 export interface TaskItem {
   id: number
   name: string
   completed?: boolean
-  isNew?: boolean
+  focus?: boolean | number
   subtasks?: TaskItem[]
 }
 
@@ -29,13 +33,29 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
       // TODO: Change ID generation logic
       id: Math.floor(Math.random() * 10000) + 100,
       name: '',
-      isNew: true,
+      focus: true,
     }
     setTasks(prevTasks => [
       ...prevTasks.slice(0, index + 1),
       newItem,
       ...prevTasks.slice(index + 1),
     ])
+  }
+
+  const handleDeleteTask = ({ id }: TaskOnDeleteEvent) => {
+    const index = tasks.map(x => x.id).indexOf(id)
+    if (tasks.length === 1) return
+    if (index === 0)
+      setTasks(prevTasks => [
+        { ...prevTasks[1], focus: true },
+        ...prevTasks.slice(2).map(x => ({ ...x, focus: false })),
+      ])
+    else
+      setTasks(prevTasks => [
+        ...prevTasks.slice(0, index - 1).map(x => ({ ...x, focus: false })),
+        { ...prevTasks[index - 1], focus: prevTasks[index - 1].name.length },
+        ...prevTasks.slice(index + 1).map(x => ({ ...x, focus: false })),
+      ])
   }
 
   return (
@@ -46,6 +66,7 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
           {...x}
           onChange={handleTaskChange}
           onAddClick={handleAddClick}
+          onDelete={handleDeleteTask}
         />
       ))}
     </>

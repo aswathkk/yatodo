@@ -24,6 +24,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 - [x] Edit task (using contentEditable)
 - [x] Add new task (button)
-- [ ] Remove tasks (backspace on empty task name)
+- [x] Remove tasks (backspace on empty task name)
 - [ ] Re-arrange tasks (dragging)
 - [ ] Move between the tasks using up & down arrow keys

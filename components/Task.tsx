@@ -13,15 +13,19 @@ export interface TaskOnChangeEvent {
 export interface TaskOnAddClickEvent {
   id: number
 }
+export interface TaskOnDeleteEvent {
+  id: number
+}
 
 interface TaskProps {
   id: number
   name: string
   completed?: boolean
   subtasks?: TaskProps[]
+  focus?: boolean | number
   onChange?: (event: TaskOnChangeEvent) => void
   onAddClick?: (event: TaskOnAddClickEvent) => void
-  isNew?: boolean
+  onDelete?: (event: TaskOnDeleteEvent) => void
 }
 
 function debounce(callback: Function, delay: number) {
@@ -39,7 +43,8 @@ const Task: FC<TaskProps> = ({
   subtasks,
   onChange,
   onAddClick,
-  isNew = false,
+  onDelete,
+  focus = false,
 }) => {
   const [checked, setChecked] = usePropAsState(completed)
   const [taskName, setTaskName] = usePropAsState(name)
@@ -47,8 +52,23 @@ const Task: FC<TaskProps> = ({
   const inputRef = useRef<any>(null)
 
   useEffect(() => {
-    if (isNew) inputRef?.current?.getEl().focus()
-  }, [])
+    if (focus !== undefined && inputRef?.current) {
+      if (typeof focus === 'boolean' && focus) inputRef.current.getEl().focus()
+      else if (typeof focus === 'number') {
+        if (focus === 0) {
+          inputRef.current.getEl().focus()
+        } else {
+          const node = inputRef.current.getEl().childNodes[0]
+          const range = document.createRange()
+          range.setStart(node, focus)
+          range.setEnd(node, focus)
+          const sel = window.getSelection()
+          sel?.removeAllRanges()
+          sel?.addRange(range)
+        }
+      }
+    }
+  }, [focus])
 
   const debouncedOnChange = useMemo(() => {
     if (onChange) return debounce(onChange, 500)
@@ -81,16 +101,28 @@ const Task: FC<TaskProps> = ({
       debouncedOnChange({ id, completed: checked, name: taskName })
   }, [taskName])
 
-  const handleAddClick = useRefCallback(() => {
+  const handleAddClick = () => {
     if (onAddClick) onAddClick({ id })
-  }, [onAddClick])
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleAddClick()
-    }
   }
+
+  const handleDelete = () => {
+    if (onDelete) onDelete({ id })
+  }
+
+  const handleKeyDown = useRefCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleAddClick()
+      }
+      if (e.key === 'Backspace') {
+        if (taskName.length > 0) return
+        e.preventDefault()
+        handleDelete()
+      }
+    },
+    [taskName, handleAddClick, handleDelete],
+  )
 
   return (
     <>
@@ -118,7 +150,7 @@ const Task: FC<TaskProps> = ({
           onChange={e => setTaskName(e.target.value)}
           ref={inputRef}
           placeholder="To-do"
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
         />
       </div>
       {childTasks && childTasks.length > 0 && (
