@@ -41,14 +41,17 @@ function insertTask(
     return []
   } else
     return [
-      ...tasks.slice(0, taskIndexCopy.length > 0 ? index : index + 1),
+      ...tasks
+        .slice(0, taskIndexCopy.length > 0 ? index : index + 1)
+        .map(x => ({ ...x, focus: false })),
       taskIndexCopy.length > 0
         ? {
             ...tasks[index],
             subtasks: insertTask(tasks[index].subtasks, taskIndexCopy, newTask),
+            focus: false,
           }
         : newTask,
-      ...tasks.slice(index + 1),
+      ...tasks.slice(index + 1).map(x => ({ ...x, focus: false })),
     ]
 }
 
