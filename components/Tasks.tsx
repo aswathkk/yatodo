@@ -18,6 +18,40 @@ interface TasksProps {
   defaultTasks: TaskItem[]
 }
 
+function findTask(tasks: TaskItem[], id: number): number[] {
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i]
+    if (task.id === id) return [i]
+    if (task.subtasks) {
+      let res = findTask(task.subtasks, id)
+      if (res.length !== 0) return [i, ...res]
+    }
+  }
+  return []
+}
+
+function insertTask(
+  tasks: TaskItem[] | undefined,
+  taskIndex: number[],
+  newTask: TaskItem,
+): TaskItem[] {
+  const taskIndexCopy = [...taskIndex]
+  const index = taskIndexCopy.shift()
+  if (index === undefined || tasks === undefined) {
+    return []
+  } else
+    return [
+      ...tasks.slice(0, taskIndexCopy.length > 0 ? index : index + 1),
+      taskIndexCopy.length > 0
+        ? {
+            ...tasks[index],
+            subtasks: insertTask(tasks[index].subtasks, taskIndexCopy, newTask),
+          }
+        : newTask,
+      ...tasks.slice(index + 1),
+    ]
+}
+
 const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
   const [tasks, setTasks] = usePropAsState(defaultTasks)
 
@@ -28,18 +62,18 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
   }
 
   const handleAddClick = ({ id }: TaskOnAddClickEvent) => {
-    const index = tasks.map(x => x.id).indexOf(id)
+    const taskIndex = findTask(tasks, id)
+    if (taskIndex.length === 0) return
+
     const newItem: TaskItem = {
       // TODO: Change ID generation logic
       id: Math.floor(Math.random() * 10000) + 100,
       name: '',
+      completed: false,
+      subtasks: [],
       focus: true,
     }
-    setTasks(prevTasks => [
-      ...prevTasks.slice(0, index + 1),
-      newItem,
-      ...prevTasks.slice(index + 1),
-    ])
+    setTasks(prevTasks => insertTask(prevTasks, taskIndex, newItem))
   }
 
   const handleDeleteTask = ({ id }: TaskOnDeleteEvent) => {

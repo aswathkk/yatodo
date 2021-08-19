@@ -156,7 +156,12 @@ const Task: FC<TaskProps> = ({
       {childTasks && childTasks.length > 0 && (
         <div className="ml-8">
           {childTasks.map(x => (
-            <Task key={x.id} {...x} onChange={handleSubtaskChange} />
+            <Task
+              key={x.id}
+              {...x}
+              onChange={handleSubtaskChange}
+              onAddClick={onAddClick}
+            />
           ))}
         </div>
       )}
