@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
+import { useState } from 'react'
 import Tasks, { TaskItem } from '../components/Tasks'
 
 const nestedTasks: TaskItem[] = [
@@ -86,6 +87,7 @@ const simpleTasks: TaskItem[] = [
 ]
 
 const Home: NextPage = () => {
+  const [taskType, setTaskType] = useState<'simple' | 'nested'>('simple')
   return (
     <div className="max-w-md mx-auto">
       <Head>
@@ -94,8 +96,26 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1 className="text-lg text-center">Simple Tasks</h1>
-      <Tasks defaultTasks={simpleTasks} />
+      <div className="flex justify-center">
+        <h1
+          className={`cursor-pointer text-lg text-center mr-4 ${
+            taskType === 'simple' ? 'underline' : ''
+          }`}
+          onClick={() => setTaskType('simple')}
+        >
+          Simple Tasks
+        </h1>
+        <h1
+          className={`cursor-pointer text-lg text-center ${
+            taskType === 'nested' ? 'underline' : ''
+          }`}
+          onClick={() => setTaskType('nested')}
+        >
+          Nested Tasks
+        </h1>
+      </div>
+      {taskType === 'simple' && <Tasks defaultTasks={simpleTasks} />}
+      {taskType === 'nested' && <Tasks defaultTasks={nestedTasks} />}
     </div>
   )
 }
