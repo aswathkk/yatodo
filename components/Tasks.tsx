@@ -90,13 +90,43 @@ function removeTask(
   }
 }
 
+function updateTasks(
+  tasks: TaskItem[] | undefined,
+  taskIndex: number[],
+  taskChange: TaskOnChangeEvent,
+): TaskItem[] {
+  const taskIndexCopy = [...taskIndex]
+  const index = taskIndexCopy.shift()
+  if (tasks === undefined) return []
+  if (taskIndexCopy.length === 0)
+    return tasks.map(task =>
+      task.id === taskChange.id ? { ...task, ...taskChange } : task,
+    )
+  else
+    return tasks.map((task, i) =>
+      i === index
+        ? {
+            ...task,
+            subtasks: updateTasks(task.subtasks, taskIndexCopy, taskChange),
+          }
+        : task,
+    )
+}
+
 const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
   const [tasks, setTasks] = usePropAsState(defaultTasks)
 
   const handleTaskChange = (e: TaskOnChangeEvent) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task => (task.id === e.id ? { ...task, ...e } : task)),
-    )
+    const taskIndex = findTask(tasks, e.id)
+    if (taskIndex.length === 0) return
+
+    console.log('change', e.id, 'index', taskIndex)
+
+    setTasks(prevTasks => updateTasks(prevTasks, taskIndex, e))
+
+    // setTasks(prevTasks =>
+    //   prevTasks.map(task => (task.id === e.id ? { ...task, ...e } : task)),
+    // )
   }
 
   const handleAddClick = ({ id }: TaskOnAddClickEvent) => {
