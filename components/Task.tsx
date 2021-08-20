@@ -161,6 +161,7 @@ const Task: FC<TaskProps> = ({
               {...x}
               onChange={handleSubtaskChange}
               onAddClick={onAddClick}
+              onDelete={onDelete}
             />
           ))}
         </div>

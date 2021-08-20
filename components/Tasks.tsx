@@ -55,6 +55,41 @@ function insertTask(
     ]
 }
 
+function removeTask(
+  tasks: TaskItem[] | undefined,
+  taskIndex: number[],
+): TaskItem[] {
+  const taskIndexCopy = [...taskIndex]
+  const index = taskIndexCopy.shift()
+  if (index === undefined || tasks === undefined) {
+    return []
+  } else {
+    if (taskIndexCopy.length === 0)
+      if (index === 0) return [{ ...tasks[1], focus: true }, ...tasks.slice(2)]
+      else
+        return [
+          ...tasks.slice(0, index - 1),
+          { ...tasks[index - 1], focus: tasks[index - 1].name.length },
+          ...tasks.slice(index + 1),
+        ]
+    return [
+      ...tasks.slice(0, index),
+      {
+        ...tasks[index],
+        subtasks:
+          tasks[index].subtasks?.length === 1
+            ? []
+            : removeTask(tasks[index].subtasks, taskIndexCopy),
+        focus:
+          tasks[index].subtasks?.length === 1
+            ? tasks[index].name.length
+            : false,
+      },
+      ...tasks.slice(index + 1),
+    ]
+  }
+}
+
 const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
   const [tasks, setTasks] = usePropAsState(defaultTasks)
 
@@ -80,19 +115,10 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
   }
 
   const handleDeleteTask = ({ id }: TaskOnDeleteEvent) => {
-    const index = tasks.map(x => x.id).indexOf(id)
-    if (tasks.length === 1) return
-    if (index === 0)
-      setTasks(prevTasks => [
-        { ...prevTasks[1], focus: true },
-        ...prevTasks.slice(2).map(x => ({ ...x, focus: false })),
-      ])
-    else
-      setTasks(prevTasks => [
-        ...prevTasks.slice(0, index - 1).map(x => ({ ...x, focus: false })),
-        { ...prevTasks[index - 1], focus: prevTasks[index - 1].name.length },
-        ...prevTasks.slice(index + 1).map(x => ({ ...x, focus: false })),
-      ])
+    const taskIndex = findTask(tasks, id)
+    if (taskIndex.length === 0 || tasks.length === 1) return
+
+    setTasks(prevTasks => removeTask(prevTasks, taskIndex))
   }
 
   return (
