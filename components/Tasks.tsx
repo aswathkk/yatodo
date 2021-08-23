@@ -4,6 +4,7 @@ import Task, {
   TaskOnAddClickEvent,
   TaskOnChangeEvent,
   TaskOnDeleteEvent,
+  TaskOnIndentEvent,
 } from './Task'
 
 export interface TaskItem {
@@ -145,6 +146,28 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
     setTasks(prevTasks => removeTask(prevTasks, taskIndex))
   }
 
+  const handleIndent = ({ id }: TaskOnIndentEvent) => {
+    const taskIndex = findTask(tasks, id)
+    if (taskIndex.length === 0 || tasks.length === 1) return
+
+    const index = taskIndex[0]
+    if (index === 0) return
+    setTasks(prevTasks => [
+      ...prevTasks.slice(0, index - 1),
+      {
+        ...prevTasks[index - 1],
+        subtasks: (prevTasks[index - 1].subtasks
+          ? prevTasks[index - 1].subtasks
+          : []
+        )?.concat({
+          ...prevTasks[index],
+          focus: prevTasks[index].name.length,
+        }),
+      },
+      ...prevTasks.slice(index + 1),
+    ])
+  }
+
   return (
     <>
       {tasks.map(x => (
@@ -154,6 +177,7 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
           onChange={handleTaskChange}
           onAddClick={handleAddClick}
           onDelete={handleDeleteTask}
+          onIndent={handleIndent}
         />
       ))}
     </>

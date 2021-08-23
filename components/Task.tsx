@@ -16,6 +16,9 @@ export interface TaskOnAddClickEvent {
 export interface TaskOnDeleteEvent {
   id: number
 }
+export interface TaskOnIndentEvent {
+  id: number
+}
 
 interface TaskProps {
   id: number
@@ -26,6 +29,7 @@ interface TaskProps {
   onChange?: (event: TaskOnChangeEvent) => void
   onAddClick?: (event: TaskOnAddClickEvent) => void
   onDelete?: (event: TaskOnDeleteEvent) => void
+  onIndent?: (event: TaskOnIndentEvent) => void
 }
 
 function debounce(callback: Function, delay: number) {
@@ -44,6 +48,7 @@ const Task: FC<TaskProps> = ({
   onChange,
   onAddClick,
   onDelete,
+  onIndent,
   focus = false,
 }) => {
   const [checked, setChecked] = usePropAsState(completed)
@@ -109,6 +114,10 @@ const Task: FC<TaskProps> = ({
     if (onDelete) onDelete({ id })
   }
 
+  const handleIndent = () => {
+    if (onIndent) onIndent({ id })
+  }
+
   const handleKeyDown = useRefCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       console.log(e.key)
@@ -121,6 +130,10 @@ const Task: FC<TaskProps> = ({
           if (taskName.length > 0) return
           e.preventDefault()
           handleDelete()
+          break
+        case 'Tab':
+          e.preventDefault()
+          handleIndent()
           break
       }
     },
