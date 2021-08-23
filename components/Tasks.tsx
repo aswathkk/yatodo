@@ -120,13 +120,7 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
     const taskIndex = findTask(tasks, e.id)
     if (taskIndex.length === 0) return
 
-    console.log('change', e.id, 'index', taskIndex)
-
     setTasks(prevTasks => updateTasks(prevTasks, taskIndex, e))
-
-    // setTasks(prevTasks =>
-    //   prevTasks.map(task => (task.id === e.id ? { ...task, ...e } : task)),
-    // )
   }
 
   const handleAddClick = ({ id }: TaskOnAddClickEvent) => {

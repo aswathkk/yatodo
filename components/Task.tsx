@@ -111,14 +111,17 @@ const Task: FC<TaskProps> = ({
 
   const handleKeyDown = useRefCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        handleAddClick()
-      }
-      if (e.key === 'Backspace') {
-        if (taskName.length > 0) return
-        e.preventDefault()
-        handleDelete()
+      console.log(e.key)
+      switch (e.key) {
+        case 'Enter':
+          e.preventDefault()
+          handleAddClick()
+          break
+        case 'Backspace':
+          if (taskName.length > 0) return
+          e.preventDefault()
+          handleDelete()
+          break
       }
     },
     [taskName, handleAddClick, handleDelete],
