@@ -120,7 +120,6 @@ const Task: FC<TaskProps> = ({
 
   const handleKeyDown = useRefCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      console.log(e.key)
       switch (e.key) {
         case 'Enter':
           e.preventDefault()
@@ -178,6 +177,7 @@ const Task: FC<TaskProps> = ({
               onChange={handleSubtaskChange}
               onAddClick={onAddClick}
               onDelete={onDelete}
+              onIndent={onIndent}
             />
           ))}
         </div>

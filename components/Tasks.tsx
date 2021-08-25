@@ -91,6 +91,40 @@ function removeTask(
   }
 }
 
+function indentTask(
+  tasks: TaskItem[] | undefined,
+  taskIndex: number[],
+): TaskItem[] {
+  const taskIndexCopy = [...taskIndex]
+  const index = taskIndexCopy.shift()
+  if (index === undefined || tasks === undefined) return []
+  if (index === 0 && taskIndexCopy.length === 0) return tasks
+  if (taskIndexCopy.length === 0)
+    return [
+      ...tasks.slice(0, index - 1),
+      {
+        ...tasks[index - 1],
+        subtasks: (tasks[index - 1].subtasks
+          ? tasks[index - 1].subtasks
+          : []
+        )?.concat({
+          ...tasks[index],
+          focus: tasks[index].name.length,
+        }),
+      },
+      ...tasks.slice(index + 1),
+    ]
+  else
+    return [
+      ...tasks.slice(0, index),
+      {
+        ...tasks[index],
+        subtasks: indentTask(tasks[index].subtasks, taskIndexCopy),
+      },
+      ...tasks.slice(index + 1),
+    ]
+}
+
 function updateTasks(
   tasks: TaskItem[] | undefined,
   taskIndex: number[],
@@ -150,22 +184,7 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
     const taskIndex = findTask(tasks, id)
     if (taskIndex.length === 0 || tasks.length === 1) return
 
-    const index = taskIndex[0]
-    if (index === 0) return
-    setTasks(prevTasks => [
-      ...prevTasks.slice(0, index - 1),
-      {
-        ...prevTasks[index - 1],
-        subtasks: (prevTasks[index - 1].subtasks
-          ? prevTasks[index - 1].subtasks
-          : []
-        )?.concat({
-          ...prevTasks[index],
-          focus: prevTasks[index].name.length,
-        }),
-      },
-      ...prevTasks.slice(index + 1),
-    ])
+    setTasks(prevTasks => indentTask(prevTasks, taskIndex))
   }
 
   return (
