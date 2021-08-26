@@ -205,7 +205,12 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
 
   const handleDeleteTask = ({ id }: TaskOnDeleteEvent) => {
     const taskIndex = findTask(tasks, id)
-    if (taskIndex.length === 0 || tasks.length === 1) return
+    if (
+      taskIndex.length === 0 ||
+      (tasks.length === 1 && tasks[0].subtasks === undefined) ||
+      tasks[0].subtasks?.length === 0
+    )
+      return
 
     setTasks(prevTasks => removeTask(prevTasks, taskIndex))
   }
