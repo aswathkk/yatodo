@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import usePropAsState from '../hooks/usePropAsState'
 import Task, {
+  IndentType,
   TaskOnAddClickEvent,
   TaskOnChangeEvent,
   TaskOnDeleteEvent,
@@ -114,15 +115,44 @@ function indentTask(
       },
       ...tasks.slice(index + 1),
     ]
-  else
+  return [
+    ...tasks.slice(0, index),
+    {
+      ...tasks[index],
+      subtasks: indentTask(tasks[index].subtasks, taskIndexCopy),
+    },
+    ...tasks.slice(index + 1),
+  ]
+}
+
+function deIndentTask(
+  tasks: TaskItem[] | undefined,
+  taskIndex: number[],
+): TaskItem[] {
+  const taskIndexCopy = [...taskIndex]
+  const index = taskIndexCopy.shift()
+  if (index === undefined || tasks === undefined) return []
+  if (index === 0 && taskIndexCopy.length === 0) return tasks
+  if (taskIndexCopy.length === 1)
     return [
       ...tasks.slice(0, index),
       {
         ...tasks[index],
-        subtasks: indentTask(tasks[index].subtasks, taskIndexCopy),
+        subtasks: tasks[index].subtasks?.filter(
+          (x, i) => i !== taskIndexCopy[0],
+        ),
       },
+      (tasks[index].subtasks ?? [])[taskIndexCopy[0]],
       ...tasks.slice(index + 1),
     ]
+  return [
+    ...tasks.slice(0, index),
+    {
+      ...tasks[index],
+      subtasks: deIndentTask(tasks[index].subtasks, taskIndexCopy),
+    },
+    ...tasks.slice(index + 1),
+  ]
 }
 
 function updateTasks(
@@ -180,11 +210,15 @@ const Tasks: FC<TasksProps> = ({ defaultTasks }) => {
     setTasks(prevTasks => removeTask(prevTasks, taskIndex))
   }
 
-  const handleIndent = ({ id }: TaskOnIndentEvent) => {
+  const handleIndent = ({ id, indentType }: TaskOnIndentEvent) => {
     const taskIndex = findTask(tasks, id)
-    if (taskIndex.length === 0 || tasks.length === 1) return
+    if (taskIndex.length === 0) return
 
-    setTasks(prevTasks => indentTask(prevTasks, taskIndex))
+    if (indentType === IndentType.INDENT)
+      setTasks(prevTasks => indentTask(prevTasks, taskIndex))
+    else if (indentType === IndentType.DEINDENT && taskIndex.length > 1) {
+      setTasks(prevTasks => deIndentTask(prevTasks, taskIndex))
+    }
   }
 
   return (

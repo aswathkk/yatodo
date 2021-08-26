@@ -16,8 +16,13 @@ export interface TaskOnAddClickEvent {
 export interface TaskOnDeleteEvent {
   id: number
 }
+export enum IndentType {
+  INDENT = 1,
+  DEINDENT = -1,
+}
 export interface TaskOnIndentEvent {
   id: number
+  indentType: IndentType
 }
 
 interface TaskProps {
@@ -114,8 +119,8 @@ const Task: FC<TaskProps> = ({
     if (onDelete) onDelete({ id })
   }
 
-  const handleIndent = () => {
-    if (onIndent) onIndent({ id })
+  const handleIndent = (indentType: IndentType = IndentType.INDENT) => {
+    if (onIndent) onIndent({ id, indentType: indentType })
   }
 
   const handleKeyDown = useRefCallback(
@@ -132,7 +137,8 @@ const Task: FC<TaskProps> = ({
           break
         case 'Tab':
           e.preventDefault()
-          handleIndent()
+          if (e.shiftKey) handleIndent(IndentType.DEINDENT)
+          else handleIndent(IndentType.INDENT)
           break
       }
     },
