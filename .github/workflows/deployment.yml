@@ -15,8 +15,8 @@ jobs:
       run: npm install
     - name: Build page
       run: |
-        npm run build
-        npm run export
+        BASE_PATH='/yatodo' npm run build
+        BASE_PATH='/yatodo' npm run export
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
       with:
